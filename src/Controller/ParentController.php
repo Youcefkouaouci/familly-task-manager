@@ -260,13 +260,9 @@ final class ParentController extends AbstractController
             $entityManager->remove($task);
             $entityManager->flush();
             
-            $this->addFlash('success', 'Task deleted successfully!');
+            $this->addFlash('success', 'Tâche supprimée avec succès');
         }
         
         return $this->redirectToRoute('app_parent_tasks');
     }
-
-    
-
-
 }
