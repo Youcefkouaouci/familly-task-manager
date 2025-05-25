@@ -7,42 +7,72 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TaskAssignmentRepository::class)]
 class TaskAssignment
-{
-    const STATUS_PENDING = 'pending';
+{    const STATUS_PENDING = 'pending';
     const STATUS_ACCEPTED = 'accepted';
     const STATUS_REFUSED = 'refused';
     const STATUS_NEGOTIATING = 'negotiating';
     const STATUS_COMPLETED = 'completed';
-
+    
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\ManyToOne(inversedBy: 'taskAssignments')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Task $task = null;
+
+    #[ORM\ManyToOne(inversedBy: 'assignedTasks')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $child = null;
+
+    #[ORM\Column(length: 20)]
     private ?string $status = self::STATUS_PENDING;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $completedAt = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
     #[ORM\Column]
-    private ?bool $notified = null;
+    private ?bool $isNotified = false;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $completedAt = null;
-
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastStatusChangedAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'taskAssignments')]
-    private ?Task $Task = null;
-
-    #[ORM\ManyToOne(inversedBy: 'assignedTasks')]
-    private ?User $user = null;
+    public function __construct()
+    {
+        $this->lastStatusChangedAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getTask(): ?Task
+    {
+        return $this->task;
+    }
+
+    public function setTask(?Task $task): self
+    {
+        $this->task = $task;
+
+        return $this;
+    }
+
+    public function getChild(): ?User
+    {
+        return $this->child;
+    }
+
+    public function setChild(?User $child): self
+    {
+        $this->child = $child;
+
+        return $this;
     }
 
     public function getStatus(): ?string
@@ -50,33 +80,13 @@ class TaskAssignment
         return $this->status;
     }
 
-    public function setStatus(string $status): static
+    public function setStatus(string $status): self
     {
+        if ($this->status !== $status) {
+            $this->lastStatusChangedAt = new \DateTimeImmutable();
+        }
+        
         $this->status = $status;
-
-        return $this;
-    }
-
-    public function getNotes(): ?string
-    {
-        return $this->notes;
-    }
-
-    public function setNotes(string $notes): static
-    {
-        $this->notes = $notes;
-
-        return $this;
-    }
-
-    public function isNotified(): ?bool
-    {
-        return $this->notified;
-    }
-
-    public function setNotified(bool $notified): static
-    {
-        $this->notified = $notified;
 
         return $this;
     }
@@ -86,9 +96,33 @@ class TaskAssignment
         return $this->completedAt;
     }
 
-    public function setCompletedAt(\DateTimeImmutable $completedAt): static
+    public function setCompletedAt(?\DateTimeImmutable $completedAt): self
     {
         $this->completedAt = $completedAt;
+
+        return $this;
+    }
+
+    public function getNotes(): ?string
+    {
+        return $this->notes;
+    }
+
+    public function setNotes(?string $notes): self
+    {
+        $this->notes = $notes;
+
+        return $this;
+    }
+
+    public function getIsNotified(): ?bool
+    {
+        return $this->isNotified;
+    }
+
+    public function setIsNotified(bool $isNotified): self
+    {
+        $this->isNotified = $isNotified;
 
         return $this;
     }
@@ -98,34 +132,52 @@ class TaskAssignment
         return $this->lastStatusChangedAt;
     }
 
-    public function setLastStatusChangedAt(\DateTimeImmutable $lastStatusChangedAt): static
+    public function setLastStatusChangedAt(?\DateTimeImmutable $lastStatusChangedAt): self
     {
         $this->lastStatusChangedAt = $lastStatusChangedAt;
 
         return $this;
     }
 
-    public function getTask(): ?Task
+    /**
+     * Check if the task was completed on time
+     */
+    public function isCompletedOnTime(): ?bool
     {
-        return $this->Task;
+        if (!$this->completedAt || $this->status !== self::STATUS_COMPLETED) {
+            return null;
+        }
+        
+        return $this->completedAt <= $this->task->getDueDate();
     }
 
-    public function setTask(?Task $Task): static
+    /**
+     * Get the human-readable status
+     */
+    public function getStatusLabel(): string
     {
-        $this->Task = $Task;
-
-        return $this;
+        return match($this->status) {
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_ACCEPTED => 'Accepted',
+            self::STATUS_REFUSED => 'Refused',
+            self::STATUS_NEGOTIATING => 'Negotiating',
+            self::STATUS_COMPLETED => 'Completed',
+            default => 'Unknown',
+        };
     }
 
-    public function getUser(): ?User
+    /**
+     * Get the CSS class for the status badge
+     */
+    public function getStatusClass(): string
     {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): static
-    {
-        $this->user = $user;
-
-        return $this;
+        return match($this->status) {
+            self::STATUS_PENDING => 'status-progress',
+            self::STATUS_ACCEPTED => 'status-accepted',
+            self::STATUS_REFUSED => 'status-rejected',
+            self::STATUS_NEGOTIATING => 'status-progress',
+            self::STATUS_COMPLETED => 'status-completed',
+            default => '',
+        };
     }
 }

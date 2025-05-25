@@ -10,8 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
 class Task
-{
-    #[ORM\Id]
+{ #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
@@ -28,21 +27,26 @@ class Task
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $recompense = null;
+    #[ORM\Column]
+    private ?\DateTimeImmutable $dueDate = null;
 
-    /**
-     * @var Collection<int, TaskAssignment>
-     */
-    #[ORM\OneToMany(targetEntity: TaskAssignment::class, mappedBy: 'Task')]
-    private Collection $taskAssignments;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $reward = null;
 
     #[ORM\ManyToOne(inversedBy: 'createdTasks')]
-    private ?User $user = null;
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $parent = null;
+
+    #[ORM\OneToMany(mappedBy: 'task', targetEntity: TaskAssignment::class, cascade: ['persist', 'remove'])]
+    private Collection $taskAssignments;
+
+    #[ORM\Column]
+    private bool $isUrgent = false;
 
     public function __construct()
     {
         $this->taskAssignments = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -55,7 +59,7 @@ class Task
         return $this->title;
     }
 
-    public function setTitle(string $title): static
+    public function setTitle(string $title): self
     {
         $this->title = $title;
 
@@ -67,7 +71,7 @@ class Task
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(string $description): self
     {
         $this->description = $description;
 
@@ -79,7 +83,7 @@ class Task
         return $this->category;
     }
 
-    public function setCategory(string $category): static
+    public function setCategory(string $category): self
     {
         $this->category = $category;
 
@@ -91,21 +95,45 @@ class Task
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getRecompense(): ?string
+    public function getDueDate(): ?\DateTimeImmutable
     {
-        return $this->recompense;
+        return $this->dueDate;
     }
 
-    public function setRecompense(string $recompense): static
+    public function setDueDate(\DateTimeImmutable $dueDate): self
     {
-        $this->recompense = $recompense;
+        $this->dueDate = $dueDate;
+
+        return $this;
+    }
+
+    public function getReward(): ?string
+    {
+        return $this->reward;
+    }
+
+    public function setReward(?string $reward): self
+    {
+        $this->reward = $reward;
+
+        return $this;
+    }
+
+    public function getParent(): ?User
+    {
+        return $this->parent;
+    }
+
+    public function setParent(?User $parent): self
+    {
+        $this->parent = $parent;
 
         return $this;
     }
@@ -118,7 +146,7 @@ class Task
         return $this->taskAssignments;
     }
 
-    public function addTaskAssignment(TaskAssignment $taskAssignment): static
+    public function addTaskAssignment(TaskAssignment $taskAssignment): self
     {
         if (!$this->taskAssignments->contains($taskAssignment)) {
             $this->taskAssignments->add($taskAssignment);
@@ -128,7 +156,7 @@ class Task
         return $this;
     }
 
-    public function removeTaskAssignment(TaskAssignment $taskAssignment): static
+    public function removeTaskAssignment(TaskAssignment $taskAssignment): self
     {
         if ($this->taskAssignments->removeElement($taskAssignment)) {
             // set the owning side to null (unless already changed)
@@ -140,15 +168,49 @@ class Task
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getIsUrgent(): bool
     {
-        return $this->user;
+        return $this->isUrgent;
     }
 
-    public function setUser(?User $user): static
+    public function setIsUrgent(bool $isUrgent): self
     {
-        $this->user = $user;
+        $this->isUrgent = $isUrgent;
 
         return $this;
+    }
+
+    /**
+     * Get the remaining time for the task
+     * 
+     * @return string Formatted remaining time
+     */
+    public function getRemainingTime(): string
+    {
+        $now = new \DateTimeImmutable();
+        $interval = $this->dueDate->diff($now);
+        
+        if ($this->dueDate < $now) {
+            return 'Overdue';
+        }
+        
+        if ($interval->days > 0) {
+            return $interval->format('%d days, %h hours');
+        }
+        
+        return $interval->format('%h hours, %i minutes');
+    }
+
+    /**
+     * Check if the task is close to its deadline
+     * 
+     * @return bool
+     */
+    public function isCloseToDeadline(): bool
+    {
+        $now = new \DateTimeImmutable();
+        $interval = $this->dueDate->diff($now);
+        
+        return $interval->days === 0 && $interval->h < 12;
     }
 }
