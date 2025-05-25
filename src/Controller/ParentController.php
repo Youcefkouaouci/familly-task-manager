@@ -100,55 +100,7 @@ final class ParentController extends AbstractController
         ]);
     }
 
-     #[Route('/tasks/new', name: 'app_parent_tasks_new')]
-    public function newTask(
-        Request $request, 
-        EntityManagerInterface $entityManager,
-        UserRepository $userRepository
-    ): Response
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-        
-        $task = new Task();
-        $task->setParent($user);
-        
-        $form = $this->createForm(TaskType::class, $task);
-        $form->handleRequest($request);
-        
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Get the selected children
-            $selectedChildren = $form->get('children')->getData();
-            
-            // Save the task
-            $entityManager->persist($task);
-            
-            // Create task assignments for each selected child
-            foreach ($selectedChildren as $child) {
-                $assignment = new TaskAssignment();
-                $assignment->setTask($task);
-                $assignment->setChild($child);
-                $assignment->setStatus(TaskAssignment::STATUS_PENDING);
-                
-                $entityManager->persist($assignment);
-                $task->addTaskAssignment($assignment);
-            }
-            
-            $entityManager->flush();
-            
-            $this->addFlash('success', 'Task created successfully!');
-            
-            return $this->redirectToRoute('app_parent_tasks');
-        }
-        
-        // récuperer tous les enfants 
-        $children = $userRepository->findAllChildren();
-        
-        return $this->render('parent/new_task.html.twig', [
-            'form' => $form->createView(),
-            'children' => $children,
-        ]);
-    }
+    
 
 
 }
