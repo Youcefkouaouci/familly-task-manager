@@ -182,7 +182,7 @@ final class ChildController extends AbstractController
     public function showTask(TaskAssignment $taskAssignment): Response
     {
         if ($taskAssignment->getChild() !== $this->getUser()) {
-            throw $this->createAccessDeniedException('You are not allowed to view this task');
+            throw $this->createAccessDeniedException('Vous n’êtes pas autorisé à afficher cette tâche');
         }
         
         return $this->render('child/task_detail.html.twig', [
