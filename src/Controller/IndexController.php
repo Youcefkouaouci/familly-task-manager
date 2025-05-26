@@ -11,7 +11,6 @@ final class IndexController extends AbstractController
     #[Route('/', name: 'app_index')]
     public function home(): Response
     {
-
         // si l'utilisateur est login rediregier vers la dashboard approprie
         if ($this->getUser()) {
 

@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/parent')]
+#[IsGranted('ROLE_PARENT')]
 final class ParentController extends AbstractController
 {
     /*
