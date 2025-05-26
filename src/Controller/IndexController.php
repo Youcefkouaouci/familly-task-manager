@@ -21,7 +21,7 @@ final class IndexController extends AbstractController
             return $this->redirectToRoute('app_child_dashboard');
         }
         
-        return $this->render('index/index.html.twig', [
+        return $this->render('index/home.html.twig', [
             'controller_name' => 'IndexController',
         ]);
     }

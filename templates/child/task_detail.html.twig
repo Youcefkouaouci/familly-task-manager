@@ -1,0 +1,189 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Task Details{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">Task Details</h1>
+        <a href="{{ path('app_child_tasks') }}" class="btn btn-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            Back to Tasks
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100 {{ task_assignment.task.isUrgent ? 'border-error-200' : '' }}">
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold text-gray-900">{{ task_assignment.task.title }}</h2>
+                            {% if task_assignment.task.isUrgent %}
+                                <span class="task-status-badge status-urgent animate-pulse-slow">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    Urgent
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center mt-1">
+                            <span class="task-status-badge {{ task_assignment.statusClass }} mr-2">
+                                {{ task_assignment.statusLabel }}
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                {{ task_assignment.task.category|capitalize }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="py-3 border-t border-b border-gray-200">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Description</h3>
+                        <p class="text-gray-600 whitespace-pre-line">{{ task_assignment.task.description }}</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Due Date</h3>
+                        <div class="mt-1">
+                            <div class="text-gray-600">{{ task_assignment.task.dueDate|date('F d, Y \a\t h:i a') }}</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Remaining Time</h3>
+                        <div class="mt-1 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="text-gray-700 font-medium {{ task_assignment.task.isCloseToDeadline ? 'text-error-600' : '' }}">
+                                {{ task_assignment.task.remainingTime }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    {% if task_assignment.task.reward %}
+                        <div class="bg-success-50 border border-success-200 rounded-md p-3">
+                            <h3 class="text-sm font-medium text-success-700 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zm7-10a1 1 0 01.707.293l.707.707L15.414 5a1 1 0 11-1.414 1.414L12.707 5.12l-.707-.707a1 1 0 01.707-1.707zm-7 8a1 1 0 01.707.293l.707.707L15.414 13a1 1 0 11-1.414 1.414l-1.293-1.293-.707-.707a1 1 0 01.707-1.707z" clip-rule="evenodd" />
+                                </svg>
+                                Reward
+                            </h3>
+                            <p class="mt-1 text-success-600">{{ task_assignment.task.reward }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    {% if task_assignment.status == constant('App\\Entity\\TaskAssignment::STATUS_NEGOTIATING') and task_assignment.notes %}
+                        <div class="bg-gray-50 border border-gray-200 rounded-md p-3">
+                            <h3 class="text-sm font-medium text-gray-700">Your Negotiation Message</h3>
+                            <p class="mt-1 text-gray-600">{{ task_assignment.notes }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100 sticky top-4">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
+                
+                {% if task_assignment.status == constant('App\\Entity\\TaskAssignment::STATUS_PENDING') %}
+                    <div class="space-y-3">
+                        <form action="{{ path('app_child_task_accept', {'id': task_assignment.id}) }}" method="post">
+                            <button type="submit" class="btn btn-success w-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                Accept Task
+                            </button>
+                        </form>
+                        
+                        <form action="{{ path('app_child_task_refuse', {'id': task_assignment.id}) }}" method="post">
+                            <button type="submit" class="btn btn-danger w-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                                Refuse Task
+                            </button>
+                        </form>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Negotiate</h3>
+                            <form action="{{ path('app_child_task_negotiate', {'id': task_assignment.id}) }}" method="post">
+                                <div class="mb-3">
+                                    <label for="note" class="sr-only">Negotiation Note</label>
+                                    <textarea id="note" name="note" rows="3" class="form-input" placeholder="Explain why you want to negotiate this task..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
+                                        <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+                                    </svg>
+                                    Send Negotiation
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% elseif task_assignment.status == constant('App\\Entity\\TaskAssignment::STATUS_ACCEPTED') %}
+                    <form action="{{ path('app_child_task_complete', {'id': task_assignment.id}) }}" method="post">
+                        <button type="submit" class="btn btn-success w-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Mark as Complete
+                        </button>
+                    </form>
+                {% elseif task_assignment.status == constant('App\\Entity\\TaskAssignment::STATUS_COMPLETED') %}
+                    <div class="bg-success-50 border border-success-200 rounded-md p-4 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-success-600" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-success-800">Task Completed!</h3>
+                        <p class="mt-1 text-xs text-success-600">
+                            {{ task_assignment.completedAt ? task_assignment.completedAt|date('F d, Y \a\t h:i a') : '' }}
+                        </p>
+                        
+                        {% if task_assignment.isCompletedOnTime is not null %}
+                            <div class="mt-3 pt-3 border-t border-success-200">
+                                {% if task_assignment.isCompletedOnTime %}
+                                    <span class="text-success-700 font-medium">
+                                        Completed on time
+                                    </span>
+                                {% else %}
+                                    <span class="text-error-600 font-medium">
+                                        Completed late
+                                    </span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% elseif task_assignment.status == constant('App\\Entity\\TaskAssignment::STATUS_REFUSED') %}
+                    <div class="bg-error-50 border border-error-200 rounded-md p-4 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-error-600" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-error-800">Task Refused</h3>
+                        <p class="mt-1 text-xs text-error-600">
+                            You have refused this task.
+                        </p>
+                    </div>
+                {% elseif task_assignment.status == constant('App\\Entity\\TaskAssignment::STATUS_NEGOTIATING') %}
+                    <div class="bg-warning-50 border border-warning-200 rounded-md p-4 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-warning-600" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-warning-800">Negotiation Pending</h3>
+                        <p class="mt-1 text-xs text-warning-600">
+                            Your negotiation request is being reviewed.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Your Tasks{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">Your Tasks</h1>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center mb-6 border-b border-gray-200 pb-4 overflow-x-auto">
+            <div class="flex space-x-2">
+                <a href="{{ path('app_child_tasks', {'filter': 'progress'}) }}" class="px-3 py-2 text-sm font-medium rounded-md {{ filter == 'progress' ? 'bg-primary-100 text-primary-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                    In Progress
+                </a>
+                <a href="{{ path('app_child_tasks', {'filter': 'completed'}) }}" class="px-3 py-2 text-sm font-medium rounded-md {{ filter == 'completed' ? 'bg-primary-100 text-primary-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                    Completed
+                </a>
+                <a href="{{ path('app_child_tasks', {'filter': 'refused'}) }}" class="px-3 py-2 text-sm font-medium rounded-md {{ filter == 'refused' ? 'bg-primary-100 text-primary-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                    Refused
+                </a>
+                <a href="{{ path('app_child_tasks', {'filter': 'negotiating'}) }}" class="px-3 py-2 text-sm font-medium rounded-md {{ filter == 'negotiating' ? 'bg-primary-100 text-primary-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                    Negotiating
+                </a>
+            </div>
+        </div>
+        
+        {% if tasks is empty %}
+            <div class="text-center py-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No tasks found</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    There are no tasks in this category.
+                </p>
+            </div>
+        {% else %}
+            <div class="space-y-4">
+                {% for task_assignment in tasks %}
+                    <div class="task-card {{ task_assignment.task.isUrgent ? 'border-error-200 bg-error-50' : '' }} hover:border-primary-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium text-gray-900">{{ task_assignment.task.title }}</h3>
+                                <div class="flex items-center text-sm text-gray-500 mt-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                    </svg>
+                                    Due: {{ task_assignment.task.dueDate|date('M d, Y h:i a') }}
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    <span class="task-status-badge {{ task_assignment.statusClass }}">
+                                        {{ task_assignment.statusLabel }}
+                                    </span>
+                                    
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        {{ task_assignment.task.category|capitalize }}
+                                    </span>
+                                    
+                                    {% if task_assignment.task.isUrgent %}
+                                        <span class="task-status-badge status-urgent">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                            </svg>
+                                            Urgent
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <a href="{{ path('app_child_task_show', {'id': task_assignment.id}) }}" class="text-primary-600 hover:text-primary-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="mt-3 text-sm text-gray-600 line-clamp-2">
+                            {{ task_assignment.task.description|slice(0, 120) }}{% if task_assignment.task.description|length > 120 %}...{% endif %}
+                        </div>
+                        
+                        {% if task_assignment.status == constant('App\\Entity\\TaskAssignment::STATUS_PENDING') %}
+                            <div class="mt-3 pt-3 border-t border-gray-100 flex space-x-2">
+                                <form action="{{ path('app_child_task_accept', {'id': task_assignment.id}) }}" method="post">
+                                    <button type="submit" class="btn btn-success py-1 px-3 text-xs">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                        </svg>
+                                        Accept
+                                    </button>
+                                </form>
+                                <form action="{{ path('app_child_task_refuse', {'id': task_assignment.id}) }}" method="post">
+                                    <button type="submit" class="btn btn-danger py-1 px-3 text-xs">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                        Refuse
+                                    </button>
+                                </form>
+                                <a href="{{ path('app_child_task_show', {'id': task_assignment.id}) }}" class="btn btn-outline py-1 px-3 text-xs">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8z" />
+                                        <path d="M12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z" />
+                                    </svg>
+                                    Negotiate
+                                </a>
+                            </div>
+                        {% elseif task_assignment.status == constant('App\\Entity\\TaskAssignment::STATUS_ACCEPTED') %}
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <form action="{{ path('app_child_task_complete', {'id': task_assignment.id}) }}" method="post">
+                                    <button type="submit" class="btn btn-success w-full py-1 text-xs">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                        </svg>
+                                        Mark as Complete
+                                    </button>
+                                </form>
+                            </div>
+                        {% elseif task_assignment.status == constant('App\\Entity\\TaskAssignment::STATUS_COMPLETED') %}
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <div class="text-sm text-gray-500">
+                                    {% if task_assignment.completedAt %}
+                                        Completed on: {{ task_assignment.completedAt|date('M d, Y h:i a') }}
+                                    {% endif %}
+                                    
+                                    {% if task_assignment.isCompletedOnTime is not null %}
+                                        <div class="mt-1">
+                                            {% if task_assignment.isCompletedOnTime %}
+                                                <span class="text-success-600 font-medium flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    Completed on time
+                                                </span>
+                                            {% else %}
+                                                <span class="text-error-600 font-medium flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    Completed late
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% elseif task_assignment.status == constant('App\\Entity\\TaskAssignment::STATUS_NEGOTIATING') %}
+                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                <div class="text-sm text-gray-600 bg-gray-50 p-2 rounded border border-gray-200">
+                                    <span class="font-medium">Your message:</span> {{ task_assignment.notes }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

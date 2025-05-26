@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create New Task{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900">Create New Task</h1>
+        <a href="{{ path('app_parent_tasks') }}" class="btn btn-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            Back to Tasks
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+        {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="form-group">
+                    {{ form_label(form.title) }}
+                    {{ form_widget(form.title) }}
+                    {{ form_errors(form.title) }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(form.category) }}
+                    {{ form_widget(form.category) }}
+                    {{ form_errors(form.category) }}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description) }}
+                {{ form_errors(form.description) }}
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="form-group">
+                    {{ form_label(form.dueDate) }}
+                    {{ form_widget(form.dueDate) }}
+                    {{ form_errors(form.dueDate) }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(form.reward) }}
+                    {{ form_widget(form.reward) }}
+                    {{ form_errors(form.reward) }}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                        {{ form_widget(form.isUrgent) }}
+                    </div>
+                    <div class="ml-3 text-sm">
+                        {{ form_label(form.isUrgent) }}
+                        <p class="text-gray-500">Mark this task as urgent to highlight it for your children.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Assign to children</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for child in children %}
+                        <div class="relative flex items-start">
+                            <div class="flex items-center h-5">
+                                <input type="checkbox" id="child_{{ child.id }}" name="{{ form.children.vars.full_name }}[]" value="{{ child.id }}" class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="child_{{ child.id }}" class="font-medium text-gray-700">{{ child.fullName }}</label>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {{ form_errors(form.children) }}
+            </div>
+            
+            <div class="flex justify-end">
+                <button type="submit" class="btn btn-primary">
+                    Create Task
+                </button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
