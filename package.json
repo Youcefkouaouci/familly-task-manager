@@ -1,0 +1,28 @@
+{
+  "name": "familly-task-manager",
+  "version": "1.0.0",
+  "description": "Plateforme web de gestion des tâches familiales permettant aux parents d’assigner des missions aux enfants, avec suivi, réponses interactives et système de récompenses.",
+  "main": "tailwind.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "concurrently \"symfony serve\" \"php bin/console asset-map:watch\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Youcefkouaouci/familly-task-manager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Youcefkouaouci/familly-task-manager/issues"
+  },
+  "homepage": "https://github.com/Youcefkouaouci/familly-task-manager#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
